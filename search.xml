@@ -1,107 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  
-  <title>HTTP和HTTPS的区别 | Hexo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="HTTP和HTTPS的区别背景超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。 为了解决HTTP协议的这一缺陷，需要使用另一种协议：安全套接字层超文本传输协议HT">
-<meta property="og:type" content="article">
-<meta property="og:title" content="HTTP和HTTPS的区别">
-<meta property="og:url" content="https://cnxbc.github.io/2023/11/28/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/index.html">
-<meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="HTTP和HTTPS的区别背景超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。 为了解决HTTP协议的这一缺陷，需要使用另一种协议：安全套接字层超文本传输协议HT">
-<meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://pic-go-pictrue.oss-cn-beijing.aliyuncs.com/image-20220429100341234.png">
-<meta property="og:image" content="http://www.mahaixiang.cn/uploads/allimg/1507/1-150H120343I41.jpg">
-<meta property="og:image" content="https://pic-go-pictrue.oss-cn-beijing.aliyuncs.com/image-20220429101703461.png">
-<meta property="article:published_time" content="2023-11-28T01:22:38.509Z">
-<meta property="article:modified_time" content="2023-11-28T01:25:32.610Z">
-<meta property="article:author" content="John Doe">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://pic-go-pictrue.oss-cn-beijing.aliyuncs.com/image-20220429100341234.png">
-  
-    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
-  
-  
-    <link rel="shortcut icon" href="/favicon.png">
-  
-  
-    
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Hello World</title>
+    <url>/2023/11/27/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
 
-  
-  
-<link rel="stylesheet" href="/css/style.css">
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
 
-  
-    
-<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
 
-  
-  
-<meta name="generator" content="Hexo 6.3.0"></head>
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">Hexo</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-        
-          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
-        
-        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://cnxbc.github.io"></form>
-      </div>
-    </div>
-  </div>
-</header>
-
-      <div class="outer">
-        <section id="main"><article id="post-http和https的区别" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2023/11/28/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/" class="article-date">
-  <time class="dt-published" datetime="2023-11-28T01:22:38.509Z" itemprop="datePublished">2023-11-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="p-name article-title" itemprop="headline name">
-      HTTP和HTTPS的区别
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <h3 id="HTTP和HTTPS的区别"><a href="#HTTP和HTTPS的区别" class="headerlink" title="HTTP和HTTPS的区别"></a>HTTP和HTTPS的区别</h3><h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。</p>
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>HTTP和HTTPS的区别</title>
+    <url>/2023/11/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<h3 id="HTTP和HTTPS的区别"><a href="#HTTP和HTTPS的区别" class="headerlink" title="HTTP和HTTPS的区别"></a>HTTP和HTTPS的区别</h3><h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。</p>
 <p>为了解决HTTP协议的这一缺陷，需要使用另一种协议：安全套接字层超文本传输协议HTTPS，为了数据传输的安全，HTTPS在HTTP的基础上加入了SSL协议，SSL依靠证书来验证服务器的身份，并为浏览器和服务器之间的通信加密。</p>
 <h4 id="1-、HTTP和HTTPS的基本概念"><a href="#1-、HTTP和HTTPS的基本概念" class="headerlink" title="1 、HTTP和HTTPS的基本概念"></a>1 、HTTP和HTTPS的基本概念</h4><p>HTTP：是互联网上应用最为广泛的一种网络协议，是一个客户端和服务器端请求和应答的标准（TCP），用于从WWW服务器传输超文本到本地浏览器的传输协议，它可以使浏览器更加高效，使网络传输减少。</p>
 <p>HTTPS：是以安全为目标的HTTP通道，简单讲是HTTP的安全版，即HTTP下加入SSL层，HTTPS的安全基础是SSL，因此加密的详细内容就需要SSL。</p>
@@ -143,7 +63,7 @@
 <h5 id="4-3、HTTPS要比HTTP多用多少服务器资源？"><a href="#4-3、HTTPS要比HTTP多用多少服务器资源？" class="headerlink" title="4.3、HTTPS要比HTTP多用多少服务器资源？"></a>4.3、HTTPS要比HTTP多用多少服务器资源？</h5><p>HTTPS其实就是建构在SSL&#x2F;TLS之上的 HTTP协议，所以，要比较HTTPS比HTTP多用多少服务器资源，马海祥认为主要看SSL&#x2F;TLS本身消耗多少服务器资源。</p>
 <img src="https://pic-go-pictrue.oss-cn-beijing.aliyuncs.com/image-20220429101703461.png" alt="image-20220429101703461" style="zoom:50%;" />
 
-<p>HTTP使用TCP三次握手建立连接，客户端和服务器需要交换3个包（具体可查看《<a target="_blank" rel="noopener" href="http://www.mahaixiang.cn/internet/801.html">HTTP服务的七层架构技术解析及运用</a>》的相关介绍）；HTTPS除了TCP的三个包，还要加上ssl握手需要的9个包，所以一共是12个包。</p>
+<p>HTTP使用TCP三次握手建立连接，客户端和服务器需要交换3个包（具体可查看《<a href="http://www.mahaixiang.cn/internet/801.html">HTTP服务的七层架构技术解析及运用</a>》的相关介绍）；HTTPS除了TCP的三个包，还要加上ssl握手需要的9个包，所以一共是12个包。</p>
 <p>HTTP建立连接，按照下面链接中针对Computer Science House的测试，是114毫秒；HTTPS建立连接，耗费436毫秒，ssl部分花费322毫秒，包括网络延时和ssl本身加解密的开销（服务器根据客户端的信息确定是否需要生成新的主密钥；服务器回复该主密钥，并返回给客户端一个用主密钥认证的信息；服务器向客户端请求数字签名和公开密钥）。</p>
 <p>当SSL连接建立后，之后的加密方式就变成了3DES等对于CPU负荷较轻的对称加密方式，相对前面SSL建立连接时的非对称加密方式，对称加密方式对CPU的负荷基本可以忽略不记，所以问题就来了，如果频繁的重建ssl的session，对于服务器性能的影响将会是致命的，尽管打开HTTPS保活可以缓解单个连接的性能问题，但是对于并发访问用户数极多的大型网站，基于负荷分担的独立的SSL termination proxy就显得必不可少了，Web服务放在SSL termination proxy之后，SSL termination proxy既可以是基于硬件的，譬如F5；也可以是基于软件的，譬如维基百科用到的就是Nginx。</p>
 <p>那采用HTTPS后，到底会多用多少服务器资源，2010年1月Gmail切换到完全使用HTTPS， 前端处理SSL机器的CPU负荷增加不超过1%，每个连接的内存消耗少于20KB，网络流量增加少于2%，由于Gmail应该是使用N台服务器分布式处理，所以CPU负荷的数据并不具有太多的参考意义，每个连接内存消耗和网络流量数据有参考意义，这篇文章中还列出了单核每秒大概处理1500次握手（针对1024-bit 的 RSA），这个数据很有参考意义。</p>
@@ -192,114 +112,9 @@
 <h5 id="9-2、StartSSL"><a href="#9-2、StartSSL" class="headerlink" title="9.2、StartSSL"></a>9.2、StartSSL</h5><p>StartSSL是StartCom公司旗下的SSL证书，提供免费SSL证书服务，且StartSSL被包括Chrome、Firefox、IE在内的主流浏览器支持，几乎所有的主流浏览器都可以正常识别StartSSL，任何个人都可以从StartSSL中申请到免费一年的SSL证书。</p>
 <h5 id="9-3、Wosign沃通SSL"><a href="#9-3、Wosign沃通SSL" class="headerlink" title="9.3、Wosign沃通SSL"></a>9.3、Wosign沃通SSL</h5><p>Wosign沃通是国内一家提供SSL证书服务的网站，其免费的SSL证书申请比较简单，在线开通，一个SSL证书只能对应一个域名，支持证书状态在线查询协议(OCSP)。</p>
 <h5 id="6-4、NameCheap"><a href="#6-4、NameCheap" class="headerlink" title="6.4、NameCheap"></a>6.4、NameCheap</h5><p>NameCheap是一家领先的ICANN认可的域名注册和网站托管公司，成立于2000年，该公司提供免费DNS解析，网址转发（可隐藏原URL，支持301重定向）等服务，此外，NameCheap还提供了一年的SSL证书免费服务。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://cnxbc.github.io/2023/11/28/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/" data-id="clphnpl4j0000uovqhceu0t9u" data-title="HTTP和HTTPS的区别" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-  
-    <a href="/2023/11/27/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
-    </a>
-  
-</nav>
-
-  
-</article>
-
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-
-  
-    
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/11/">November 2023</a></li></ul>
-    </div>
-  </div>
-
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2023/11/28/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/">HTTP和HTTPS的区别</a>
-          </li>
-        
-          <li>
-            <a href="/2023/11/27/hello-world/">Hello World</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      
-      &copy; 2023 John Doe<br>
-      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-
-<script src="/js/jquery-3.6.4.min.js"></script>
-
-
-
-  
-<script src="/fancybox/jquery.fancybox.min.js"></script>
-
-
-
-
-<script src="/js/script.js"></script>
-
-
-
-
-
-  </div>
-</body>
-</html>
+]]></content>
+      <categories>
+        <category>计算机网络</category>
+      </categories>
+  </entry>
+</search>
