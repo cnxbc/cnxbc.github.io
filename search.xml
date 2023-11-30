@@ -19,6 +19,135 @@
 ]]></content>
   </entry>
   <entry>
+    <title>k8s安装</title>
+    <url>/2023/11/30/%E5%AE%B9%E5%99%A8/k8s%E5%AE%89%E8%A3%85/</url>
+    <content><![CDATA[<p>由于工作需要在k8s上测试相关应用，在本地ubuntu虚拟机上安装了单机版k8s，并做了详细记录（本地Ubuntu安装做了省略）</p>
+<h2 id="ubuntu相关配置"><a href="#ubuntu相关配置" class="headerlink" title="ubuntu相关配置"></a>ubuntu相关配置</h2><h3 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h3><p>查看防火墙状态 inactive说明是未激活</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo ufw status</span><br></pre></td></tr></table></figure>
+
+<p>开机不启动防火墙，重启即可生效</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo ufw <span class="built_in">disable</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="关闭swap"><a href="#关闭swap" class="headerlink" title="关闭swap"></a>关闭swap</h3><p>k8s init的时候不允许开启swap</p>
+<p>临时关闭</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">swapoff -a</span><br></pre></td></tr></table></figure>
+
+<p>永久关闭</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vi /etc/fstab</span><br></pre></td></tr></table></figure>
+
+<p>注释掉最后一行 <code>/swap.img</code></p>
+<h2 id="k8s集群配置"><a href="#k8s集群配置" class="headerlink" title="k8s集群配置"></a>k8s集群配置</h2><h3 id="安装Docker-和-kubeadm、kubelet、kubectl"><a href="#安装Docker-和-kubeadm、kubelet、kubectl" class="headerlink" title="安装Docker 和 kubeadm、kubelet、kubectl"></a>安装Docker 和 kubeadm、kubelet、kubectl</h3><h3 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">apt-get update &amp;&amp; apt install -y docker.io</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装kubeamd、kubectl、kubelet安装脚本"><a href="#安装kubeamd、kubectl、kubelet安装脚本" class="headerlink" title="安装kubeamd、kubectl、kubelet安装脚本"></a>安装kubeamd、kubectl、kubelet安装脚本</h3><p>这里我们创建一个脚本installAdm.sh然后将以下代码复制过去</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bashapt update &amp;&amp; apt install apt-transport-https</span></span><br><span class="line">curl -fsSL https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -</span><br><span class="line">add-apt-repository <span class="string">&quot;deb [arch=amd64] https://mirrors.aliyun.com/kubernetes/apt/ kubernetes-xenial main&quot;</span></span><br><span class="line">apt-get update</span><br><span class="line">apt-cache madison kubelet kubectl kubeadm |grep <span class="string">&#x27;1.22.7-00&#x27;</span> </span><br><span class="line">apt install -y kubelet=1.22.7-00 kubectl=1.22.7-00 kubeadm=1.22.7-00</span><br></pre></td></tr></table></figure>
+
+<p>然后执行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sh installAdm.sh</span><br></pre></td></tr></table></figure>
+
+<p>安装完成</p>
+<p><strong>再次禁用swap</strong></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/default/kubelet</span><br><span class="line">KUBELET_EXTRA_ARGS=<span class="string">&quot;--fail-swap-on=false&quot;</span></span><br><span class="line">systemctl daemon-reload &amp;&amp; systemctl restart kubelet</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改cgroup管理器"><a href="#修改cgroup管理器" class="headerlink" title="修改cgroup管理器"></a>修改cgroup管理器</h3><p>ubuntu 系统，debian 系统，centos7 系统，都是使用 systemd 初始化系统的。systemd 这边已经有一套 cgroup 管理器了，如果容器运行时和 kubelet 使用 cgroupfs，此时就会存在 cgroups 和 systemd 两种 cgroup 管理器。也就意味着操作系统里面存在两种资源分配的视图，当操作系统上存在 CPU，内存等等资源不足的时候，操作系统上的进程会变得不稳定</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/docker/daemon.json </span><br></pre></td></tr></table></figure>
+
+<p>然后将下面设置加入daemon.json文件</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;exec-opts&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;native.cgroupdriver=systemd&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span> </span><br><span class="line">  <span class="attr">&quot;registry-mirrors&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;https://27test.mirror.aliyuncs.com&quot;</span><span class="punctuation">]</span> #注意这个用自己的</span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后重新加载kubelet</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">systemctl restart docker</span><br><span class="line">systemctl restart kubelet</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建集群"><a href="#创建集群" class="headerlink" title="创建集群"></a>创建集群</h3><p>通过<code>kubernetes -version</code>查看k8s的版本，GitVersion字段的值表示版本</p>
+<p>初始化集群，注意kubernetes-version和上面保持一致</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubeadm init \</span><br><span class="line">  --kubernetes-version=v1.22.7 \</span><br><span class="line">  --image-repository registry.aliyuncs.com/google_containers \</span><br><span class="line">  --pod-network-cidr=10.24.0.0/16 \</span><br><span class="line">  --ignore-preflight-errors=Swap</span><br></pre></td></tr></table></figure>
+
+<p>安装成功后会显示如下信息</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">Your Kubernetes control-plane has initialized successfully!</span><br><span class="line">​</span><br><span class="line">To start using your cluster, you need to run the following as a regular user:</span><br><span class="line">​</span><br><span class="line">  <span class="built_in">mkdir</span> -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">  sudo <span class="built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">  sudo <span class="built_in">chown</span> $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">​</span><br><span class="line">Alternatively, <span class="keyword">if</span> you are the root user, you can run:</span><br><span class="line">​</span><br><span class="line">  <span class="built_in">export</span> KUBECONFIG=/etc/kubernetes/admin.conf</span><br><span class="line">​</span><br><span class="line">You should now deploy a pod network to the cluster.</span><br><span class="line">Run <span class="string">&quot;kubectl apply -f [podnetwork].yaml&quot;</span> with one of the options listed at:</span><br><span class="line">  https://kubernetes.io/docs/concepts/cluster-administration/addons/</span><br><span class="line">​</span><br><span class="line">Then you can <span class="built_in">join</span> any number of worker nodes by running the following on each as root:</span><br><span class="line">​</span><br><span class="line">kubeadm <span class="built_in">join</span> 192.168.153.130:6443 --token r9u5j1.22jvtt8v9yojz9qx \</span><br><span class="line">    --discovery-token-ca-cert-hash sha256:8d89868d63aa863bae751ee2c848d8417ca7e464ee905afa99a15fb15a680191 </span><br></pre></td></tr></table></figure>
+
+<p>执行.kube配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p <span class="variable">$HOME</span>/.kube</span><br><span class="line">sudo <span class="built_in">cp</span> -i /etc/kubernetes/admin.conf <span class="variable">$HOME</span>/.kube/config</span><br><span class="line">sudo <span class="built_in">chown</span> $(<span class="built_in">id</span> -u):$(<span class="built_in">id</span> -g) <span class="variable">$HOME</span>/.kube/config</span><br></pre></td></tr></table></figure>
+
+<p>配置calico网络</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://projectcalico.docs.tigera.io/manifests/calico.yaml -O</span><br><span class="line">kubectl apply -f calico.yaml</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>kubectl get nodes</code>可以查看节点是否启动成功，若status为Ready则表示成功</p>
+<h2 id="使用dashboard可视化管理k8s"><a href="#使用dashboard可视化管理k8s" class="headerlink" title="使用dashboard可视化管理k8s"></a>使用dashboard可视化管理k8s</h2><h3 id="dashboard安装"><a href="#dashboard安装" class="headerlink" title="dashboard安装"></a>dashboard安装</h3><p>在master节点配置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml</span><br></pre></td></tr></table></figure>
+
+<p>可能出现的问题：命令执行后并没有正确下载yaml，可以通过cat命令查看，若是没有正确下载，可以通过浏览器访问上述地址进行下载，上传到服务器后执行<code>kubectl apply -f dashboard.yaml</code></p>
+<h3 id="设置访问端口"><a href="#设置访问端口" class="headerlink" title="设置访问端口"></a>设置访问端口</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl edit svc kubernetes-dashboard -n kubernetes-dashboard</span><br></pre></td></tr></table></figure>
+
+<p>将里面的type: ClusterIP 改为 type: NodePort</p>
+<h3 id="获取访问端口"><a href="#获取访问端口" class="headerlink" title="获取访问端口"></a>获取访问端口</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl get svc -A |grep kubernetes-dashboard</span><br></pre></td></tr></table></figure>
+
+<h3 id="创建访问账号"><a href="#创建访问账号" class="headerlink" title="创建访问账号"></a>创建访问账号</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim dash.yaml</span><br></pre></td></tr></table></figure>
+
+<p>将一下内容写入dash.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kubernetes-dashboard</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line">  <span class="attr">apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line">  <span class="attr">kind:</span> <span class="string">ClusterRole</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">cluster-admin</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">admin-user</span></span><br><span class="line">  <span class="attr">namespace:</span> <span class="string">kubernetes-dashboard</span></span><br></pre></td></tr></table></figure>
+
+<p>应用dash.yaml</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl apply -f dash.yaml</span><br></pre></td></tr></table></figure>
+
+<h3 id="获取访问token"><a href="#获取访问token" class="headerlink" title="获取访问token"></a>获取访问token</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl -n kubernetes-dashboard get secret $(kubectl -n kubernetes-dashboard get sa/admin-user -o jsonpath=<span class="string">&quot;&#123;.secrets[0].name&#125;&quot;</span>) -o go-template=<span class="string">&quot;&#123;&#123;.data.token | base64decode&#125;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="访问dashboard"><a href="#访问dashboard" class="headerlink" title="访问dashboard"></a>访问dashboard</h3><p><a href="https://link.zhihu.com/?target=https://master/">https://master</a>节点IP:30008（获取访问端口中查出来的端口）</p>
+<h1 id=""><a href="#" class="headerlink" title=""></a></h1>]]></content>
+      <categories>
+        <category>容器</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>snmpsim使用教程</title>
+    <url>/2023/11/29/%E9%80%9A%E4%BF%A1/snmpsim%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<h2 id="1、服务器安装python和pip"><a href="#1、服务器安装python和pip" class="headerlink" title="1、服务器安装python和pip"></a>1、服务器安装python和pip</h2><p>类linux服务器一般默认安装python，可以输入python进行检验有无安装，如果安装了则会进入python交互界面，如未安装，需要自行安装python，一般安装python会自动安装pip。</p>
+<h2 id="2、安装snmpsim相关依赖"><a href="#2、安装snmpsim相关依赖" class="headerlink" title="2、安装snmpsim相关依赖"></a>2、安装snmpsim相关依赖</h2><p>执行命令pip install pysnmp，一般会自动安装其它依赖的python包，如没有安装，则需要根据提示手动安装（提示缺少哪个包，则执行pip install xxx）。</p>
+<h2 id="3、下载snmpsim应用"><a href="#3、下载snmpsim应用" class="headerlink" title="3、下载snmpsim应用"></a>3、下载snmpsim应用</h2><p>在github上，通过<a href="https://github.com/etingof/snmpsim">https://github.com/etingof/snmpsim</a> 下载snmpsim应用，通过sftp上传到相应的linux服务器，解压压缩包后，在文件夹内执行python setup.py install，安装snmpsim应用，执行完没有报错则是安装成功。</p>
+<h2 id="4、模拟snmp设备"><a href="#4、模拟snmp设备" class="headerlink" title="4、模拟snmp设备"></a>4、模拟snmp设备</h2><p>执行 <code>snmpsimd.py --data-dir=C:/Users/master/Desktop/snmp --args-from-file=C:/Users/master/Desktop/param.txt</code>其中–data-dir表示数据文件夹里面包含public.snmprec文件，此文件一般在snmpsim文件夹下有默认的，可以使用，或者自己根据真实snmp设备自己制作，param.txt内容为需要模拟的snmp设备的ip和端口，格式如下图所示。</p>
+<h3 id="根据已有的mib制作public-snmprec"><a href="#根据已有的mib制作public-snmprec" class="headerlink" title="根据已有的mib制作public.snmprec"></a>根据已有的mib制作public.snmprec</h3><p>将需要模拟的mib文件放在当前用户的根目录下<code>~/.pysnmp/mibs</code>，并执行mib2dev.py会扫描此目录下的mib文件，执行指令为：<code>mib2dev.py --output-file=./data/public.snmprec --mib-module=SNMPv2-MIB</code>。生成后public.snmprec文件后执行步骤四即可。</p>
+<h3 id="根据真实设备制作public-snmprec"><a href="#根据真实设备制作public-snmprec" class="headerlink" title="根据真实设备制作public.snmprec"></a>根据真实设备制作public.snmprec</h3><p><code>snmprec.py --agent-udpv4-endpoint=demo.snmplabs.com --output-file=./data/public.snmprec</code></p>
+]]></content>
+      <categories>
+        <category>通信</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s常见指令</title>
+    <url>/2023/11/30/%E5%AE%B9%E5%99%A8/k8s%E5%B8%B8%E8%A7%81%E6%8C%87%E4%BB%A4/</url>
+    <content><![CDATA[<p>收集一些工作中能用到的k8s命令</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 部署应用</span></span><br><span class="line">kubectl apply -f *.yaml</span><br><span class="line"><span class="comment"># 获取状态</span></span><br><span class="line">kubectl get [deployment|pod|service|rs|node]</span><br><span class="line"><span class="comment"># 获取描述信息</span></span><br><span class="line">kubectl describe [deployment|pod|service|rs|node]</span><br><span class="line"><span class="comment"># 修改部署信息</span></span><br><span class="line">kubectl edit deployment * </span><br></pre></td></tr></table></figure>
+
+
+]]></content>
+      <categories>
+        <category>容器</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>springboot容器化</title>
+    <url>/2023/11/30/%E5%AE%B9%E5%99%A8/springboot%E5%AE%B9%E5%99%A8%E5%8C%96/</url>
+    <content><![CDATA[<p>常见java应用发布一般为<code>java -jar *.jar</code>，随着容器话时代的到来，越来越多的应用需要部署在容器上，介绍一种基础的容器化部署</p>
+<h2 id="构建java应用"><a href="#构建java应用" class="headerlink" title="构建java应用"></a>构建java应用</h2><p>springboot应用可以通过maven的package指令进行jar包构建</p>
+<h2 id="构建docker镜像"><a href="#构建docker镜像" class="headerlink" title="构建docker镜像"></a>构建docker镜像</h2><p>首先编写Dockerfile文件</p>
+<figure class="highlight docker"><table><tr><td class="code"><pre><span class="line"><span class="keyword">FROM</span> openjdk:<span class="number">8</span>-jdk-slim</span><br><span class="line"></span><br><span class="line"><span class="keyword">LABEL</span><span class="language-bash"> maintainer=zhansan</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> java-demo-0.0.1-SNAPSHOT.jar /app.jar</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ENTRYPOINT</span><span class="language-bash"> [<span class="string">&quot;java&quot;</span>,<span class="string">&quot;-jar&quot;</span>,<span class="string">&quot;/app.jar&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>将jar包和DockerFile文件上传到服务器</p>
+<p>保证服务器正确安装docker后，执行如下命令，打包镜像</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 保证jar包和Dockerfile文件在同一目录下，v1.0代表版本</span></span><br><span class="line">docker build -t java-demo:v1.0 .</span><br></pre></td></tr></table></figure>
+
+<p>查看镜像时候打包成功</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker images</span><br></pre></td></tr></table></figure>
+
+<p>启动容器</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker run -d -p 8080:8080 java-demo:v1.0</span><br></pre></td></tr></table></figure>
+
+<p>-p参数中第一个8080容器内端口，第二个8080映射的虚拟机端口，外部浏览器可以通过虚拟机ip:8080访问容器内应用</p>
+<h2 id="查看容器日志"><a href="#查看容器日志" class="headerlink" title="查看容器日志"></a>查看容器日志</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker <span class="built_in">log</span> java-demo:v1.0</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>容器</category>
+      </categories>
+  </entry>
+  <entry>
     <title>HTTP和HTTPS的区别</title>
     <url>/2023/11/28/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/http%E5%92%8Chttps%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
     <content><![CDATA[<h3 id="HTTP和HTTPS的区别"><a href="#HTTP和HTTPS的区别" class="headerlink" title="HTTP和HTTPS的区别"></a>HTTP和HTTPS的区别</h3><h4 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h4><p>超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息，HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此，HTTP协议不适合传输一些敏感信息，比如：信用卡号、密码等支付信息。</p>
@@ -115,6 +244,35 @@
 ]]></content>
       <categories>
         <category>计算机网络</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>k8s部署应用</title>
+    <url>/2023/11/30/%E5%AE%B9%E5%99%A8/k8s%E9%83%A8%E7%BD%B2%E5%BA%94%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="创建流程"><a href="#创建流程" class="headerlink" title="创建流程"></a>创建流程</h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#创建应用</span></span><br><span class="line">kubectl create deployment  wxstest --image=registry.cn-hangzhou.aliyuncs.com/wxsnamespace/wxstest:1.0.0</span><br><span class="line"><span class="comment">#删除命令kubectl delete deployment wxstest</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#把上面打印出来的内容保存到 wxstest.yaml中，并执行下面命令,执行完后用这个命令看是否成功kubectl get deployments</span></span><br><span class="line">kubectl expose deployment wxstest --port=8088 --target-port=8088 --<span class="built_in">type</span>=NodePort</span><br><span class="line"><span class="comment">#删除命令kubectl delete svc wxstest</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看pod部署进度</span></span><br><span class="line">kubectl describe pods</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看deployment部署进度</span></span><br><span class="line">kubectl describe deployment</span><br><span class="line"></span><br><span class="line"><span class="comment"># 查看service部署进度</span></span><br><span class="line">kubectl describe service</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看应用</span></span><br><span class="line">kubectl get services</span><br><span class="line"></span><br><span class="line"><span class="comment">#本机访问看是否能正常返回页面</span></span><br><span class="line">curl http://10.100.143.1:8088/mylogin.html</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看容器名称</span></span><br><span class="line">kubectl get pods -o wide</span><br><span class="line"></span><br><span class="line"><span class="comment">#查看容器日志</span></span><br><span class="line">kubectl logs -f wxstest-64686ddd65-dhvtc</span><br></pre></td></tr></table></figure>
+
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><p>问题描述：在单机版k8s上部署应用后，发现Pod的状态一直处于pending状态，</p>
+<p>于是 kubectl describe pods 查看了下发现：</p>
+<p> <code>0/1 nodes are available: 1 node(s) had taint &#123;node-role.kubernetes.io/master: &#125;, that the pod didn‘t</code></p>
+<p>意思是   1个节点有pod不能容忍的污点</p>
+<p><strong>原因</strong>：<strong>当创建单机版的 k8s 时，这个时候 master 节点是默认不允许调度 pod 。</strong></p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl taint nodes --all node-role.kubernetes.io/master-</span><br></pre></td></tr></table></figure>
+
+<p><strong>补充知识：</strong></p>
+<p>Taint（污点）和 Toleration（容忍）可以作用于 node 和 pod 上，其目的是优化 pod 在集群间的调度，这跟节点亲和性类似，只不过它们作用的方式相反，具有 taint 的 node 和 pod 是互斥关系，而具有节点亲和性关系的 node 和 pod 是相吸的。另外还有可以给 node 节点设置 label，通过给 pod 设置 nodeSelector 将 pod 调度到具有匹配标签的节点上。</p>
+<p>Taint 和 toleration 相互配合，可以用来避免 pod 被分配到不合适的节点上。每个节点上都可以应用一个或多个 taint ，这表示对于那些不能容忍这些 taint 的 pod，是不会被该节点接受的。如果将 toleration 应用于 pod 上，则表示这些 pod 可以（但不要求）被调度到具有相应 taint 的节点上。</p>
+<p>设置污点</p>
+<p>NoSchedule: 一定不能被调度<br>PreferNoSchedule: 尽量不要调度<br>NoExecute: 不仅不会调度, 还会驱逐Node上已有的Pod</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl taint nodes node1 key1=value1:NoSchedule</span><br><span class="line">kubectl taint nodes node1 key1=value1:NoExecute</span><br><span class="line">kubectl taint nodes node1 key2=value2:NoSchedule</span><br></pre></td></tr></table></figure>
+
+<p>查看污点</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl describe node node1</span><br></pre></td></tr></table></figure>
+
+<p>删除污点</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kubectl taint node node1 key1:NoSchedule- <span class="comment"># 这里的key可以不用指定value</span></span><br><span class="line">kubectl taint node node1 key1:NoExecute-</span><br><span class="line">kubectl taint node node1 key1- <span class="comment"># 删除指定key所有的effect</span></span><br><span class="line">kubectl taint node node1 key2:NoSchedule-</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>容器</category>
       </categories>
   </entry>
 </search>
